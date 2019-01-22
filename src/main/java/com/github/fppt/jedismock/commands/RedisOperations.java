@@ -57,5 +57,6 @@ public enum RedisOperations {
     HMGET,
     HMSET,
     SMEMBERS,
-    MULTI;
+    MULTI,
+    SELECT;
 }

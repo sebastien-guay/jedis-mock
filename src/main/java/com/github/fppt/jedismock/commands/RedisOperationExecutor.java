@@ -170,6 +170,11 @@ public class RedisOperationExecutor {
                 return Response.clientResponse(name, Response.OK);
             }
 
+            if(name.equals(RedisOperations.SELECT.name())){
+                changeActiveRedisBase(commandParams);
+                return Response.clientResponse(name, Response.OK);
+            }
+
             //Checking if we mutating the transaction or the redisBases
             RedisOperation redisOperation = buildSimpleOperation(name, commandParams);
             if(transactionModeOn){
@@ -183,6 +188,11 @@ public class RedisOperationExecutor {
             LOG.error("Malformed request", e);
             return Response.error(e.getMessage());
         }
+    }
+
+    private void changeActiveRedisBase(List<Slice> commandParams) {
+        String data = new String(commandParams.get(0).data());
+        selectedRedisBase = Integer.parseInt(data);
     }
 
     private void newTransaction(){
