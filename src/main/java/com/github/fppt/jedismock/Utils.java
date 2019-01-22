@@ -2,7 +2,12 @@ package com.github.fppt.jedismock;
 
 import com.github.fppt.jedismock.exception.WrongValueTypeException;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 /**
  * Created by Xiaolu on 2015/4/21.
