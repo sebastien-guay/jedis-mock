@@ -5,7 +5,7 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Xiaolu on 2015/4/21.
@@ -13,10 +13,10 @@ import java.util.List;
 public class RedisService implements Runnable {
 
     private final ServerSocket server;
-    private final List<RedisBase> redisBases;
+    private final Map<Integer, RedisBase> redisBases;
     private final ServiceOptions options;
 
-    public RedisService(ServerSocket server, List<RedisBase> redisBases, ServiceOptions options) {
+    public RedisService(ServerSocket server, Map<Integer, RedisBase> redisBases, ServiceOptions options) {
         Preconditions.checkNotNull(server);
         Preconditions.checkNotNull(redisBases);
         Preconditions.checkNotNull(options);

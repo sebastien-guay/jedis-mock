@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,7 +27,7 @@ public class RedisClient implements Runnable {
     private final InputStream in;
     private final OutputStream out;
 
-    RedisClient(List<RedisBase> redisBases, Socket socket, ServiceOptions options) throws IOException {
+    RedisClient(Map<Integer, RedisBase> redisBases, Socket socket, ServiceOptions options) throws IOException {
         Preconditions.checkNotNull(redisBases);
         Preconditions.checkNotNull(socket);
         Preconditions.checkNotNull(options);
