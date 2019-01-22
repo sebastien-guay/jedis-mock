@@ -12,7 +12,7 @@ import static com.github.fppt.jedismock.Utils.deserializeObject;
 
 class RO_lindex extends AbstractRedisOperation {
     RO_lindex(RedisBase base, List<Slice> params) {
-        super(base, params, 2, null, null);
+        super(base, params);
     }
 
     Slice response() {

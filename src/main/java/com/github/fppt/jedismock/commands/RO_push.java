@@ -13,7 +13,7 @@ import static com.github.fppt.jedismock.Utils.serializeObject;
 
 abstract class RO_push extends AbstractRedisOperation {
     RO_push(RedisBase base, List<Slice> params) {
-        super(base, params,null, 1, null);
+        super(base, params);
     }
 
     abstract void pusher(LinkedList<Slice> list, Slice slice);

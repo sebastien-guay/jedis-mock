@@ -12,7 +12,7 @@ import static com.github.fppt.jedismock.Utils.serializeObject;
 
 abstract class RO_pop extends AbstractRedisOperation {
     RO_pop(RedisBase base, List<Slice> params ) {
-        super(base, params, 1, null, null);
+        super(base, params);
     }
 
     abstract Slice popper(LinkedList<Slice> list);

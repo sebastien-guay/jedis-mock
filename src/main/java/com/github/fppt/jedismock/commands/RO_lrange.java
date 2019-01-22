@@ -14,7 +14,7 @@ import static com.github.fppt.jedismock.Utils.deserializeObject;
 
 class RO_lrange extends AbstractRedisOperation {
     RO_lrange(RedisBase base, List<Slice> params) {
-        super(base, params, 3, null, null);
+        super(base, params);
     }
 
     Slice response() {

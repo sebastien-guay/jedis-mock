@@ -71,12 +71,6 @@ public class TestRedisOperationExecutor {
     }
 
     @Test
-    public void testWrongNumberOfArguments() throws ParseErrorException, EOFException {
-        assertCommandError(array("SET", "ab"));
-        assertCommandError(array("pfcount"));
-    }
-
-    @Test
     public void testUnknownCommand() throws ParseErrorException, EOFException {
         assertCommandError(array("unknown"));
     }
