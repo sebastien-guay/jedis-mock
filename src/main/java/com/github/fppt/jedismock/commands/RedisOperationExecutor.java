@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Xiaolu on 2015/4/20.
@@ -18,15 +19,20 @@ import java.util.List;
 public class RedisOperationExecutor {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RedisOperationExecutor.class);
     private final RedisClient owner;
-    private final RedisBase base;
+    private final Map<Integer, RedisBase> redisBases;
     private boolean transactionModeOn;
     private List<RedisOperation> transaction;
+    private int selectedRedisBase = 0;
 
-    public RedisOperationExecutor(RedisBase base, RedisClient owner) {
-        this.base = base;
+    public RedisOperationExecutor(Map<Integer, RedisBase> redisBases, RedisClient owner) {
+        this.redisBases = redisBases;
         this.owner = owner;
         transactionModeOn = false;
         transaction = new ArrayList<>();
+    }
+
+    private RedisBase getCurrentBase(){
+        return redisBases.computeIfAbsent(selectedRedisBase, key -> new RedisBase());
     }
 
     private RedisOperation buildSimpleOperation(String name, List<Slice> params){
@@ -34,118 +40,118 @@ public class RedisOperationExecutor {
 
         switch(foundOperation){
             case SET:
-                return new RO_set(base, params);
+                return new RO_set(getCurrentBase(), params);
             case SETEX:
-                return new RO_setex(base, params);
+                return new RO_setex(getCurrentBase(), params);
             case PSETEX:
-                return new RO_psetex(base, params);
+                return new RO_psetex(getCurrentBase(), params);
             case SETNX:
-                return new RO_setnx(base, params);
+                return new RO_setnx(getCurrentBase(), params);
             case SETBIT:
-                return new RO_setbit(base, params);
+                return new RO_setbit(getCurrentBase(), params);
             case APPEND:
-                return new RO_append(base, params);
+                return new RO_append(getCurrentBase(), params);
             case GET:
-                return new RO_get(base, params);
+                return new RO_get(getCurrentBase(), params);
             case GETBIT:
-                return new RO_getbit(base, params);
+                return new RO_getbit(getCurrentBase(), params);
             case TTL:
-                return new RO_ttl(base, params);
+                return new RO_ttl(getCurrentBase(), params);
             case PTTL:
-                return new RO_pttl(base, params);
+                return new RO_pttl(getCurrentBase(), params);
             case EXPIRE:
-                return new RO_expire(base, params);
+                return new RO_expire(getCurrentBase(), params);
             case PEXPIRE:
-                return new RO_pexpire(base, params);
+                return new RO_pexpire(getCurrentBase(), params);
             case INCR:
-                return new RO_incr(base, params);
+                return new RO_incr(getCurrentBase(), params);
             case INCRBY:
-                return new RO_incrby(base, params);
+                return new RO_incrby(getCurrentBase(), params);
             case DECR:
-                return new RO_decr(base, params);
+                return new RO_decr(getCurrentBase(), params);
             case DECRBY:
-                return new RO_decrby(base, params);
+                return new RO_decrby(getCurrentBase(), params);
             case PFCOUNT:
-                return new RO_pfcount(base, params);
+                return new RO_pfcount(getCurrentBase(), params);
             case PFADD:
-                return new RO_pfadd(base, params);
+                return new RO_pfadd(getCurrentBase(), params);
             case PFMERGE:
-                return new RO_pfmerge(base, params);
+                return new RO_pfmerge(getCurrentBase(), params);
             case MGET:
-                return new RO_mget(base, params);
+                return new RO_mget(getCurrentBase(), params);
             case MSET:
-                return new RO_mset(base, params);
+                return new RO_mset(getCurrentBase(), params);
             case GETSET:
-                return new RO_getset(base, params);
+                return new RO_getset(getCurrentBase(), params);
             case STRLEN:
-                return new RO_strlen(base, params);
+                return new RO_strlen(getCurrentBase(), params);
             case DEL:
-                return new RO_del(base, params);
+                return new RO_del(getCurrentBase(), params);
             case EXISTS:
-                return new RO_exists(base, params);
+                return new RO_exists(getCurrentBase(), params);
             case EXPIREAT:
-                return new RO_expireat(base, params);
+                return new RO_expireat(getCurrentBase(), params);
             case PEXPIREAT:
-                return new RO_pexpireat(base, params);
+                return new RO_pexpireat(getCurrentBase(), params);
             case LPUSH:
-                return new RO_lpush(base, params);
+                return new RO_lpush(getCurrentBase(), params);
             case RPUSH:
-                return new RO_rpush(base, params);
+                return new RO_rpush(getCurrentBase(), params);
             case LPUSHX:
-                return new RO_lpushx(base, params);
+                return new RO_lpushx(getCurrentBase(), params);
             case LRANGE:
-                return new RO_lrange(base, params);
+                return new RO_lrange(getCurrentBase(), params);
             case LLEN:
-                return new RO_llen(base, params);
+                return new RO_llen(getCurrentBase(), params);
             case LPOP:
-                return new RO_lpop(base, params);
+                return new RO_lpop(getCurrentBase(), params);
             case RPOP:
-                return new RO_rpop(base, params);
+                return new RO_rpop(getCurrentBase(), params);
             case LINDEX:
-                return new RO_lindex(base, params);
+                return new RO_lindex(getCurrentBase(), params);
             case RPOPLPUSH:
-                return new RO_rpoplpush(base, params);
+                return new RO_rpoplpush(getCurrentBase(), params);
             case BRPOPLPUSH:
-                return new RO_brpoplpush(base, params);
+                return new RO_brpoplpush(getCurrentBase(), params);
             case SUBSCRIBE:
-                return new RO_subscribe(base, owner, params);
+                return new RO_subscribe(getCurrentBase(), owner, params);
             case UNSUBSCRIBE:
-                return new RO_unsubscribe(base, owner, params);
+                return new RO_unsubscribe(getCurrentBase(), owner, params);
             case PUBLISH:
-                return new RO_publish(base, params);
+                return new RO_publish(getCurrentBase(), params);
             case FLUSHALL:
-                return new RO_flushall(base, params);
+                return new RO_flushall(getCurrentBase(), params);
             case LREM:
-                return new RO_lrem(base, params);
+                return new RO_lrem(getCurrentBase(), params);
             case QUIT:
-                return new RO_quit(base, owner, params);
+                return new RO_quit(getCurrentBase(), owner, params);
             case EXEC:
                 transactionModeOn = false;
-                return new RO_exec(base, transaction, params);
+                return new RO_exec(getCurrentBase(), transaction, params);
             case PING:
-                return new RO_ping(base, params);
+                return new RO_ping(getCurrentBase(), params);
             case KEYS:
-                return new RO_keys(base, params);
+                return new RO_keys(getCurrentBase(), params);
             case SADD:
-                return new RO_sadd(base, params);
+                return new RO_sadd(getCurrentBase(), params);
             case SMEMBERS:
-                return new RO_smembers(base, params);
+                return new RO_smembers(getCurrentBase(), params);
             case SPOP:
-                return new RO_spop(base, params);
+                return new RO_spop(getCurrentBase(), params);
             case HGET:
-                return new RO_hget(base, params);
+                return new RO_hget(getCurrentBase(), params);
             case HSET:
-                return new RO_hset(base, params);
+                return new RO_hset(getCurrentBase(), params);
             case HDEL:
-                return new RO_hdel(base, params);
+                return new RO_hdel(getCurrentBase(), params);
             case HGETALL:
-                return new RO_hegetall(base, params);
+                return new RO_hegetall(getCurrentBase(), params);
             case SINTER:
-                return new RO_sinter(base, params);
+                return new RO_sinter(getCurrentBase(), params);
             case HMGET:
-                return new RO_hmget(base, params);
+                return new RO_hmget(getCurrentBase(), params);
             case HMSET:
-                return new RO_hmset(base, params);
+                return new RO_hmset(getCurrentBase(), params);
             default:
                 throw new UnsupportedOperationException(String.format("Unsupported operation '%s'", name));
         }
@@ -164,7 +170,7 @@ public class RedisOperationExecutor {
                 return Response.clientResponse(name, Response.OK);
             }
 
-            //Checking if we mutating the transaction or the base
+            //Checking if we mutating the transaction or the redisBases
             RedisOperation redisOperation = buildSimpleOperation(name, commandParams);
             if(transactionModeOn){
                 transaction.add(redisOperation);
