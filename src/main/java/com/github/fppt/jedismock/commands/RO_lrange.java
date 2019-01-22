@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static com.github.fppt.jedismock.Utils.convertToInteger;
-import static com.github.fppt.jedismock.Utils.deserializeObject;
 
 class RO_lrange extends AbstractRedisOperation {
     RO_lrange(RedisBase base, List<Slice> params) {
@@ -19,13 +18,7 @@ class RO_lrange extends AbstractRedisOperation {
 
     Slice response() {
         Slice key = params().get(0);
-        Slice data = base().getValue(key);
-        LinkedList<Slice> list;
-        if (data != null) {
-            list = deserializeObject(data);
-        } else {
-            list = Lists.newLinkedList();
-        }
+        LinkedList<Slice> list = getDataFromBase(key, Lists.newLinkedList());
 
         int start = convertToInteger(params().get(1).toString());
         int end = convertToInteger(params().get(2).toString());

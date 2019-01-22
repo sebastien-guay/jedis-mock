@@ -8,8 +8,6 @@ import com.google.common.collect.Lists;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.github.fppt.jedismock.Utils.deserializeObject;
-
 class RO_llen extends AbstractRedisOperation {
     RO_llen(RedisBase base, List<Slice> params) {
         super(base, params);
@@ -17,13 +15,7 @@ class RO_llen extends AbstractRedisOperation {
 
     Slice response() {
         Slice key = params().get(0);
-        Slice data = base().getValue(key);
-        LinkedList<Slice> list;
-        if (data != null) {
-            list = deserializeObject(data);
-        } else {
-            list = Lists.newLinkedList();
-        }
+        LinkedList<Slice> list = getDataFromBase(key, Lists.newLinkedList());
         return Response.integer(list.size());
     }
 }
