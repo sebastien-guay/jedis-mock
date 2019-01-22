@@ -18,12 +18,13 @@ import java.util.List;
 public class RedisOperationExecutor {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(RedisOperationExecutor.class);
     private final RedisClient owner;
-    private final RedisBase base;
+    private final List<RedisBase> redisBases;
     private boolean transactionModeOn;
     private List<RedisOperation> transaction;
+    private int selectedRedisBase = 0;
 
-    public RedisOperationExecutor(RedisBase base, RedisClient owner) {
-        this.base = base;
+    public RedisOperationExecutor(List<RedisBase> redisBases, RedisClient owner) {
+        this.redisBases = redisBases;
         this.owner = owner;
         transactionModeOn = false;
         transaction = new ArrayList<>();
@@ -32,118 +33,118 @@ public class RedisOperationExecutor {
     private RedisOperation buildSimpleOperation(String name, List<Slice> params){
         switch(name){
             case "set":
-                return new RO_set(base, params);
+                return new RO_set(redisBases.get(selectedRedisBase), params);
             case "setex":
-                return new RO_setex(base, params);
+                return new RO_setex(redisBases.get(selectedRedisBase), params);
             case "psetex":
-                return new RO_psetex(base, params);
+                return new RO_psetex(redisBases.get(selectedRedisBase), params);
             case "setnx":
-                return new RO_setnx(base, params);
+                return new RO_setnx(redisBases.get(selectedRedisBase), params);
             case "setbit":
-                return new RO_setbit(base, params);
+                return new RO_setbit(redisBases.get(selectedRedisBase), params);
             case "append":
-                return new RO_append(base, params);
+                return new RO_append(redisBases.get(selectedRedisBase), params);
             case "get":
-                return new RO_get(base, params);
+                return new RO_get(redisBases.get(selectedRedisBase), params);
             case "getbit":
-                return new RO_getbit(base, params);
+                return new RO_getbit(redisBases.get(selectedRedisBase), params);
             case "ttl":
-                return new RO_ttl(base, params);
+                return new RO_ttl(redisBases.get(selectedRedisBase), params);
             case "pttl":
-                return new RO_pttl(base, params);
+                return new RO_pttl(redisBases.get(selectedRedisBase), params);
             case "expire":
-                return new RO_expire(base, params);
+                return new RO_expire(redisBases.get(selectedRedisBase), params);
             case "pexpire":
-                return new RO_pexpire(base, params);
+                return new RO_pexpire(redisBases.get(selectedRedisBase), params);
             case "incr":
-                return new RO_incr(base, params);
+                return new RO_incr(redisBases.get(selectedRedisBase), params);
             case "incrby":
-                return new RO_incrby(base, params);
+                return new RO_incrby(redisBases.get(selectedRedisBase), params);
             case "decr":
-                return new RO_decr(base, params);
+                return new RO_decr(redisBases.get(selectedRedisBase), params);
             case "decrby":
-                return new RO_decrby(base, params);
+                return new RO_decrby(redisBases.get(selectedRedisBase), params);
             case "pfcount":
-                return new RO_pfcount(base, params);
+                return new RO_pfcount(redisBases.get(selectedRedisBase), params);
             case "pfadd":
-                return new RO_pfadd(base, params);
+                return new RO_pfadd(redisBases.get(selectedRedisBase), params);
             case "pfmerge":
-                return new RO_pfmerge(base, params);
+                return new RO_pfmerge(redisBases.get(selectedRedisBase), params);
             case "mget":
-                return new RO_mget(base, params);
+                return new RO_mget(redisBases.get(selectedRedisBase), params);
             case "mset":
-                return new RO_mset(base, params);
+                return new RO_mset(redisBases.get(selectedRedisBase), params);
             case "getset":
-                return new RO_getset(base, params);
+                return new RO_getset(redisBases.get(selectedRedisBase), params);
             case "strlen":
-                return new RO_strlen(base, params);
+                return new RO_strlen(redisBases.get(selectedRedisBase), params);
             case "del":
-                return new RO_del(base, params);
+                return new RO_del(redisBases.get(selectedRedisBase), params);
             case "exists":
-                return new RO_exists(base, params);
+                return new RO_exists(redisBases.get(selectedRedisBase), params);
             case "expireat":
-                return new RO_expireat(base, params);
+                return new RO_expireat(redisBases.get(selectedRedisBase), params);
             case "pexpireat":
-                return new RO_pexpireat(base, params);
+                return new RO_pexpireat(redisBases.get(selectedRedisBase), params);
             case "lpush":
-                return new RO_lpush(base, params);
+                return new RO_lpush(redisBases.get(selectedRedisBase), params);
             case "rpush":
-                return new RO_rpush(base, params);
+                return new RO_rpush(redisBases.get(selectedRedisBase), params);
             case "lpushx":
-                return new RO_lpushx(base, params);
+                return new RO_lpushx(redisBases.get(selectedRedisBase), params);
             case "lrange":
-                return new RO_lrange(base, params);
+                return new RO_lrange(redisBases.get(selectedRedisBase), params);
             case "llen":
-                return new RO_llen(base, params);
+                return new RO_llen(redisBases.get(selectedRedisBase), params);
             case "lpop":
-                return new RO_lpop(base, params);
+                return new RO_lpop(redisBases.get(selectedRedisBase), params);
             case "rpop":
-                return new RO_rpop(base, params);
+                return new RO_rpop(redisBases.get(selectedRedisBase), params);
             case "lindex":
-                return new RO_lindex(base, params);
+                return new RO_lindex(redisBases.get(selectedRedisBase), params);
             case "rpoplpush":
-                return new RO_rpoplpush(base, params);
+                return new RO_rpoplpush(redisBases.get(selectedRedisBase), params);
             case "brpoplpush":
-                return new RO_brpoplpush(base, params);
+                return new RO_brpoplpush(redisBases.get(selectedRedisBase), params);
             case "subscribe":
-                return new RO_subscribe(base, owner, params);
+                return new RO_subscribe(redisBases.get(selectedRedisBase), owner, params);
             case "unsubscribe":
-                return new RO_unsubscribe(base, owner, params);
+                return new RO_unsubscribe(redisBases.get(selectedRedisBase), owner, params);
             case "publish":
-                return new RO_publish(base, params);
+                return new RO_publish(redisBases.get(selectedRedisBase), params);
             case "flushall":
-                return new RO_flushall(base, params);
+                return new RO_flushall(redisBases.get(selectedRedisBase), params);
             case "lrem":
-                return new RO_lrem(base, params);
+                return new RO_lrem(redisBases.get(selectedRedisBase), params);
             case "quit":
-                return new RO_quit(base, owner, params);
+                return new RO_quit(redisBases.get(selectedRedisBase), owner, params);
             case "exec":
                 transactionModeOn = false;
-                return new RO_exec(base, transaction, params);
+                return new RO_exec(redisBases.get(selectedRedisBase), transaction, params);
             case "ping":
-                return new RO_ping(base, params);
+                return new RO_ping(redisBases.get(selectedRedisBase), params);
             case "keys":
-                return new RO_keys(base, params);
+                return new RO_keys(redisBases.get(selectedRedisBase), params);
             case "sadd":
-                return new RO_sadd(base, params);
+                return new RO_sadd(redisBases.get(selectedRedisBase), params);
             case "smembers":
-                return new RO_smembers(base, params);
+                return new RO_smembers(redisBases.get(selectedRedisBase), params);
             case "spop":
-                return new RO_spop(base, params);
+                return new RO_spop(redisBases.get(selectedRedisBase), params);
             case "hget":
-                return new RO_hget(base, params);
+                return new RO_hget(redisBases.get(selectedRedisBase), params);
             case "hset":
-                return new RO_hset(base, params);
+                return new RO_hset(redisBases.get(selectedRedisBase), params);
             case "hdel":
-                return new RO_hdel(base, params);
+                return new RO_hdel(redisBases.get(selectedRedisBase), params);
             case "hgetall":
-                return new RO_hegetall(base, params);
+                return new RO_hegetall(redisBases.get(selectedRedisBase), params);
             case "sinter":
-                return new RO_sinter(base, params);
+                return new RO_sinter(redisBases.get(selectedRedisBase), params);
             case "hmget":
-                return new RO_hmget(base, params);
+                return new RO_hmget(redisBases.get(selectedRedisBase), params);
             case "hmset":
-                return new RO_hmset(base, params);
+                return new RO_hmset(redisBases.get(selectedRedisBase), params);
             default:
                 throw new UnsupportedOperationException(String.format("Unsupported operation '%s'", name));
         }
@@ -162,7 +163,7 @@ public class RedisOperationExecutor {
                 return Response.clientResponse(name, Response.OK);
             }
 
-            //Checking if we mutating the transaction or the base
+            //Checking if we mutating the transaction or the redisBases
             RedisOperation redisOperation = buildSimpleOperation(name, commandParams);
             if(transactionModeOn){
                 transaction.add(redisOperation);

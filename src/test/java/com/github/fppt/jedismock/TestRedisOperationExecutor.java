@@ -6,6 +6,9 @@ import com.github.fppt.jedismock.exception.ParseErrorException;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -57,7 +60,9 @@ public class TestRedisOperationExecutor {
     @Before
     public void initCommandExecutor() {
         //TODO: Mock out the client here
-        executor = new RedisOperationExecutor(new RedisBase(), null);
+        List<RedisBase> redisBaseList = new LinkedList<>();
+        redisBaseList.add(new RedisBase());
+        executor = new RedisOperationExecutor(redisBaseList, null);
     }
 
     @Test
