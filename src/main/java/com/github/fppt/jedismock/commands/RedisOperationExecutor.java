@@ -36,59 +36,44 @@ public class RedisOperationExecutor {
         return redisBases.computeIfAbsent(selectedRedisBase, key -> new RedisBase());
     }
 
-    private RedisOperation buildSimpleOperation(String name, List<Slice> params){
-        RedisOperations foundOperation;
-        try {
-            foundOperation = RedisOperations.valueOf(name);
-        } catch(IllegalArgumentException e){
-            throw new UnsupportedOperationException(String.format("Unsupported operation '%s'", name));
-        }
-        return foundOperation.factory().apply(getCurrentBase(), params);
-    }
-
     private Optional<Slice> buildMetaRedisOperation(String name, List<Slice> params){
-        if(name.equals(MetaRedisOperations.MULTI.name())){
-            newTransaction();
-            return Optional.of(Response.clientResponse(name, Response.OK));
+        if(name.equals("multi")){
+            Slice result = new RO_multi(this::newTransaction).execute();
+            return Optional.of(Response.clientResponse(name, result));
         }
 
-        if(name.equals(MetaRedisOperations.SELECT.name())){
+        if(name.equals("select")){
             changeActiveRedisBase(params);
             return Optional.of(Response.clientResponse(name, Response.OK));
         }
 
-        try {
-            MetaRedisOperations operation = MetaRedisOperations.valueOf(name);
-            switch(operation){
-                case SUBSCRIBE:
-                    return Optional.of(new RO_subscribe(getCurrentBase(), owner, params).execute());
-                case UNSUBSCRIBE:
-                    return Optional.of(new RO_unsubscribe(getCurrentBase(), owner, params).execute());
-                case QUIT:
-                    return Optional.of(new RO_quit(owner).execute());
-                case EXEC:
-                    transactionModeOn = false;
-                    return Optional.of(new RO_exec(transaction).execute());
-            }
-        } catch (IllegalArgumentException ignored){
-
+        switch(name){
+            case "subscribe":
+                return Optional.of(new RO_subscribe(getCurrentBase(), owner, params).execute());
+            case "unsubscribe":
+                return Optional.of(new RO_unsubscribe(getCurrentBase(), owner, params).execute());
+            case "quit":
+                return Optional.of(new RO_quit(owner).execute());
+            case "exec":
+                transactionModeOn = false;
+                return Optional.of(new RO_exec(transaction).execute());
+            default:
+                return Optional.empty();
         }
-
-        return Optional.empty();
     }
 
     public synchronized Slice execCommand(RedisCommand command) {
         Preconditions.checkArgument(command.parameters().size() > 0);
         List<Slice> params = command.parameters();
         List<Slice> commandParams = params.subList(1, params.size());
-        String name = new String(params.get(0).data()).toUpperCase();
+        String name = new String(params.get(0).data()).toLowerCase();
 
         try {
             Optional<Slice> result = buildMetaRedisOperation(name, commandParams);
             if(result.isPresent()) return result.get();
 
             //Checking if we mutating the transaction or the redisBases
-            RedisOperation redisOperation = buildSimpleOperation(name, commandParams);
+            RedisOperation redisOperation = OperationFactory.buildSimpleOperation(getCurrentBase(), name, commandParams);
             if(transactionModeOn){
                 transaction.add(redisOperation);
             } else {
@@ -107,7 +92,7 @@ public class RedisOperationExecutor {
         selectedRedisBase = Integer.parseInt(data);
     }
 
-    private void newTransaction(){
+    private synchronized void newTransaction(){
         if(transactionModeOn) throw new RuntimeException("Redis mock does not support more than one transaction");
         transactionModeOn = true;
     }
