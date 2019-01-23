@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by Xiaolu on 2015/4/20.
@@ -113,21 +114,15 @@ public class RedisOperationExecutor {
                 return new RO_rpoplpush(getCurrentBase(), params);
             case BRPOPLPUSH:
                 return new RO_brpoplpush(getCurrentBase(), params);
-            case SUBSCRIBE:
-                return new RO_subscribe(getCurrentBase(), owner, params);
-            case UNSUBSCRIBE:
-                return new RO_unsubscribe(getCurrentBase(), owner, params);
             case PUBLISH:
                 return new RO_publish(getCurrentBase(), params);
             case FLUSHALL:
                 return new RO_flushall(getCurrentBase(), params);
             case LREM:
                 return new RO_lrem(getCurrentBase(), params);
-            case QUIT:
-                return new RO_quit(getCurrentBase(), owner, params);
             case EXEC:
                 transactionModeOn = false;
-                return new RO_exec(getCurrentBase(), transaction, params);
+                return new RO_exec(transaction);
             case PING:
                 return new RO_ping(getCurrentBase(), params);
             case KEYS:
@@ -157,6 +152,34 @@ public class RedisOperationExecutor {
         }
     }
 
+    private Optional<Slice> buildMetaRedisOperation(String name, List<Slice> params){
+        if(name.equals(RedisOperations.MULTI.name())){
+            newTransaction();
+            return Optional.of(Response.clientResponse(name, Response.OK));
+        }
+
+        if(name.equals(RedisOperations.SELECT.name())){
+            changeActiveRedisBase(params);
+            return Optional.of(Response.clientResponse(name, Response.OK));
+        }
+
+        try {
+            MetaRedisOperations operation = MetaRedisOperations.valueOf(name);
+            switch(operation){
+                case SUBSCRIBE:
+                    return Optional.of(new RO_subscribe(getCurrentBase(), owner, params).execute());
+                case UNSUBSCRIBE:
+                    return Optional.of(new RO_unsubscribe(getCurrentBase(), owner, params).execute());
+                case QUIT:
+                    return Optional.of(new RO_quit(owner).execute());
+            }
+        } catch (IllegalArgumentException ignored){
+
+        }
+
+        return Optional.empty();
+    }
+
     public synchronized Slice execCommand(RedisCommand command) {
         Preconditions.checkArgument(command.parameters().size() > 0);
         List<Slice> params = command.parameters();
@@ -164,16 +187,8 @@ public class RedisOperationExecutor {
         String name = new String(params.get(0).data()).toUpperCase();
 
         try {
-            //Meta Command handling
-            if(name.equals(RedisOperations.MULTI.name())){
-                newTransaction();
-                return Response.clientResponse(name, Response.OK);
-            }
-
-            if(name.equals(RedisOperations.SELECT.name())){
-                changeActiveRedisBase(commandParams);
-                return Response.clientResponse(name, Response.OK);
-            }
+            Optional<Slice> result = buildMetaRedisOperation(name, commandParams);
+            if(result.isPresent()) return result.get();
 
             //Checking if we mutating the transaction or the redisBases
             RedisOperation redisOperation = buildSimpleOperation(name, commandParams);

@@ -1,5 +1,9 @@
 package com.github.fppt.jedismock.commands;
 
+/**
+ * Lists all operations which affects the {@link com.github.fppt.jedismock.RedisBase} with no side effects.
+ * This can be thought of as simple atomic operations.
+ */
 public enum RedisOperations {
     SET,
     SETEX,
