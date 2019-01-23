@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class RO_hegetall extends AbstractRedisOperation {
-    public RO_hegetall(RedisBase base, List<Slice> params) {
+public class RO_hgetall extends AbstractRedisOperation {
+    public RO_hgetall(RedisBase base, List<Slice> params) {
         super(base, params);
     }
 

@@ -8,4 +8,7 @@ public enum MetaRedisOperations {
     SUBSCRIBE,
     UNSUBSCRIBE,
     QUIT,
+    EXEC,
+    MULTI,
+    SELECT;
 }

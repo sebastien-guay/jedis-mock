@@ -37,128 +37,22 @@ public class RedisOperationExecutor {
     }
 
     private RedisOperation buildSimpleOperation(String name, List<Slice> params){
-        RedisOperations foundOperation = RedisOperations.valueOf(name);
-
-        switch(foundOperation){
-            case SET:
-                return new RO_set(getCurrentBase(), params);
-            case SETEX:
-                return new RO_setex(getCurrentBase(), params);
-            case PSETEX:
-                return new RO_psetex(getCurrentBase(), params);
-            case SETNX:
-                return new RO_setnx(getCurrentBase(), params);
-            case SETBIT:
-                return new RO_setbit(getCurrentBase(), params);
-            case APPEND:
-                return new RO_append(getCurrentBase(), params);
-            case GET:
-                return new RO_get(getCurrentBase(), params);
-            case GETBIT:
-                return new RO_getbit(getCurrentBase(), params);
-            case TTL:
-                return new RO_ttl(getCurrentBase(), params);
-            case PTTL:
-                return new RO_pttl(getCurrentBase(), params);
-            case EXPIRE:
-                return new RO_expire(getCurrentBase(), params);
-            case PEXPIRE:
-                return new RO_pexpire(getCurrentBase(), params);
-            case INCR:
-                return new RO_incr(getCurrentBase(), params);
-            case INCRBY:
-                return new RO_incrby(getCurrentBase(), params);
-            case DECR:
-                return new RO_decr(getCurrentBase(), params);
-            case DECRBY:
-                return new RO_decrby(getCurrentBase(), params);
-            case PFCOUNT:
-                return new RO_pfcount(getCurrentBase(), params);
-            case PFADD:
-                return new RO_pfadd(getCurrentBase(), params);
-            case PFMERGE:
-                return new RO_pfmerge(getCurrentBase(), params);
-            case MGET:
-                return new RO_mget(getCurrentBase(), params);
-            case MSET:
-                return new RO_mset(getCurrentBase(), params);
-            case GETSET:
-                return new RO_getset(getCurrentBase(), params);
-            case STRLEN:
-                return new RO_strlen(getCurrentBase(), params);
-            case DEL:
-                return new RO_del(getCurrentBase(), params);
-            case EXISTS:
-                return new RO_exists(getCurrentBase(), params);
-            case EXPIREAT:
-                return new RO_expireat(getCurrentBase(), params);
-            case PEXPIREAT:
-                return new RO_pexpireat(getCurrentBase(), params);
-            case LPUSH:
-                return new RO_lpush(getCurrentBase(), params);
-            case RPUSH:
-                return new RO_rpush(getCurrentBase(), params);
-            case LPUSHX:
-                return new RO_lpushx(getCurrentBase(), params);
-            case LRANGE:
-                return new RO_lrange(getCurrentBase(), params);
-            case LLEN:
-                return new RO_llen(getCurrentBase(), params);
-            case LPOP:
-                return new RO_lpop(getCurrentBase(), params);
-            case RPOP:
-                return new RO_rpop(getCurrentBase(), params);
-            case LINDEX:
-                return new RO_lindex(getCurrentBase(), params);
-            case RPOPLPUSH:
-                return new RO_rpoplpush(getCurrentBase(), params);
-            case BRPOPLPUSH:
-                return new RO_brpoplpush(getCurrentBase(), params);
-            case PUBLISH:
-                return new RO_publish(getCurrentBase(), params);
-            case FLUSHALL:
-                return new RO_flushall(getCurrentBase(), params);
-            case LREM:
-                return new RO_lrem(getCurrentBase(), params);
-            case EXEC:
-                transactionModeOn = false;
-                return new RO_exec(transaction);
-            case PING:
-                return new RO_ping(getCurrentBase(), params);
-            case KEYS:
-                return new RO_keys(getCurrentBase(), params);
-            case SADD:
-                return new RO_sadd(getCurrentBase(), params);
-            case SMEMBERS:
-                return new RO_smembers(getCurrentBase(), params);
-            case SPOP:
-                return new RO_spop(getCurrentBase(), params);
-            case HGET:
-                return new RO_hget(getCurrentBase(), params);
-            case HSET:
-                return new RO_hset(getCurrentBase(), params);
-            case HDEL:
-                return new RO_hdel(getCurrentBase(), params);
-            case HGETALL:
-                return new RO_hegetall(getCurrentBase(), params);
-            case SINTER:
-                return new RO_sinter(getCurrentBase(), params);
-            case HMGET:
-                return new RO_hmget(getCurrentBase(), params);
-            case HMSET:
-                return new RO_hmset(getCurrentBase(), params);
-            default:
-                throw new UnsupportedOperationException(String.format("Unsupported operation '%s'", name));
+        RedisOperations foundOperation;
+        try {
+            foundOperation = RedisOperations.valueOf(name);
+        } catch(IllegalArgumentException e){
+            throw new UnsupportedOperationException(String.format("Unsupported operation '%s'", name));
         }
+        return foundOperation.factory().apply(getCurrentBase(), params);
     }
 
     private Optional<Slice> buildMetaRedisOperation(String name, List<Slice> params){
-        if(name.equals(RedisOperations.MULTI.name())){
+        if(name.equals(MetaRedisOperations.MULTI.name())){
             newTransaction();
             return Optional.of(Response.clientResponse(name, Response.OK));
         }
 
-        if(name.equals(RedisOperations.SELECT.name())){
+        if(name.equals(MetaRedisOperations.SELECT.name())){
             changeActiveRedisBase(params);
             return Optional.of(Response.clientResponse(name, Response.OK));
         }
@@ -172,6 +66,9 @@ public class RedisOperationExecutor {
                     return Optional.of(new RO_unsubscribe(getCurrentBase(), owner, params).execute());
                 case QUIT:
                     return Optional.of(new RO_quit(owner).execute());
+                case EXEC:
+                    transactionModeOn = false;
+                    return Optional.of(new RO_exec(transaction).execute());
             }
         } catch (IllegalArgumentException ignored){
 
