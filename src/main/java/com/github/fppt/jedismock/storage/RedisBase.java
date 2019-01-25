@@ -41,13 +41,11 @@ public class RedisBase {
     }
 
     public long setTTL(Slice key, long ttl) {
-        long result = keyValueStorage.setTTL(key, ttl);
-        return result;
+        return keyValueStorage.setTTL(key, ttl);
     }
 
     public long setDeadline(Slice key, long deadline) {
-        long result = keyValueStorage.setDeadline(key, deadline);
-        return result;
+        return keyValueStorage.setDeadline(key, deadline);
     }
 
     public void clear(){

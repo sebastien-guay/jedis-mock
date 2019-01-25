@@ -1,23 +1,22 @@
 package com.github.fppt.jedismock.operations;
 
-import com.github.fppt.jedismock.server.RedisClient;
 import com.github.fppt.jedismock.server.Response;
 import com.github.fppt.jedismock.server.Slice;
-import com.github.fppt.jedismock.storage.RedisBase;
+import com.github.fppt.jedismock.storage.OperationExecutorState;
 
 import java.util.List;
 
 public class RO_subscribe extends AbstractRedisOperation {
-    private final RedisClient client;
+    private OperationExecutorState state;
 
-    public RO_subscribe(RedisBase base, RedisClient client, List<Slice> params) {
-        super(base, params);
-        this.client = client;
+    public RO_subscribe(OperationExecutorState state, List<Slice> params) {
+        super(state.base(), params);
+        this.state = state;
     }
 
     Slice response() {
-        params().forEach(channel -> base().addSubscriber(channel, client));
-        List<Slice> numSubscriptions = base().getSubscriptions(client);
+        params().forEach(channel -> base().addSubscriber(channel, state.owner()));
+        List<Slice> numSubscriptions = base().getSubscriptions(state.owner());
 
         return Response.subscribedToChannel(numSubscriptions);
     }

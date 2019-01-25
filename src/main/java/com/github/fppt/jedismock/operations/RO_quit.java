@@ -1,20 +1,20 @@
 package com.github.fppt.jedismock.operations;
 
-import com.github.fppt.jedismock.server.RedisClient;
 import com.github.fppt.jedismock.server.Response;
 import com.github.fppt.jedismock.server.Slice;
+import com.github.fppt.jedismock.storage.OperationExecutorState;
 
 public class RO_quit implements RedisOperation {
-    private final RedisClient client;
+    private OperationExecutorState state;
 
-    public RO_quit(RedisClient client) {
-        this.client = client;
+    public RO_quit(OperationExecutorState state) {
+        this.state = state;
     }
 
     @Override
     public Slice execute() {
-        client.sendResponse(Response.clientResponse("quit", Response.OK), "quit");
-        client.close();
+        state.owner().sendResponse(Response.clientResponse("quit", Response.OK), "quit");
+        state.owner().close();
         return Response.SKIP;
     }
 }

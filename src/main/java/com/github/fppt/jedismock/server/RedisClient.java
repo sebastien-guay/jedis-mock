@@ -1,5 +1,6 @@
 package com.github.fppt.jedismock.server;
 
+import com.github.fppt.jedismock.storage.OperationExecutorState;
 import com.github.fppt.jedismock.storage.RedisBase;
 import com.github.fppt.jedismock.commands.RedisCommand;
 import com.github.fppt.jedismock.commands.RedisCommandParser;
@@ -35,7 +36,8 @@ public class RedisClient implements Runnable {
         Preconditions.checkNotNull(socket);
         Preconditions.checkNotNull(options);
 
-        this.executor = new RedisOperationExecutor(redisBases, this);
+        OperationExecutorState state = new OperationExecutorState(this, redisBases);
+        this.executor = new RedisOperationExecutor(state);
         this.socket = socket;
         this.options = options;
         this.in = socket.getInputStream();
