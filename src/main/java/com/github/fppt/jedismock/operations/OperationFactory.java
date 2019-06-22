@@ -59,6 +59,7 @@ public class OperationFactory {
         TRANSACTIONAL_OPERATIONS.put("keys", RO_keys::new);
         TRANSACTIONAL_OPERATIONS.put("sadd", RO_sadd::new);
         TRANSACTIONAL_OPERATIONS.put("scan", RO_scan::new);
+        TRANSACTIONAL_OPERATIONS.put("sscan", RO_sscan::new);
         TRANSACTIONAL_OPERATIONS.put("spop", RO_spop::new);
         TRANSACTIONAL_OPERATIONS.put("srem", RO_srem::new);
         TRANSACTIONAL_OPERATIONS.put("scard", RO_scard::new);
@@ -76,6 +77,7 @@ public class OperationFactory {
         TRANSACTIONAL_OPERATIONS.put("blpop", RO_blpop::new);
         TRANSACTIONAL_OPERATIONS.put("brpop", RO_brpop::new);
         TRANSACTIONAL_OPERATIONS.put("zadd", RO_zadd::new);
+        TRANSACTIONAL_OPERATIONS.put("zcard", RO_zcard::new);
         TRANSACTIONAL_OPERATIONS.put("zrange", RO_zrange::new);
         TRANSACTIONAL_OPERATIONS.put("zrem", RO_zrem::new);
     }
